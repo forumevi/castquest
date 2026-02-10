@@ -1,0 +1,9 @@
+{
+  "name": "Daily Caster",
+  "description": "Logged into CastQuest multiple days in a row.",
+  "image": "https://castquest.xyz/badges/daily-caster.png",
+  "attributes": [
+    { "trait_type": "Category", "value": "Engagement" },
+    { "trait_type": "Rarity", "value": "Common" }
+  ]
+}
