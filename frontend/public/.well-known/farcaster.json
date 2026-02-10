@@ -1,0 +1,11 @@
+{
+  "miniapp": {
+    "version": "1",
+    "name": "CastQuest",
+    "iconUrl": "https://castquest.vercel.app/icon.png",
+    "homeUrl": "https://castquest.vercel.app",
+    "subtitle": "Complete missions. Earn onchain proof.",
+    "description": "Social + onchain missions on Farcaster and Base.",
+    "primaryCategory": "social"
+  }
+}
