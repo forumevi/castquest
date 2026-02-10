@@ -1,0 +1,9 @@
+{
+  "name": "Early Messenger",
+  "description": "Helped spread the word about CastQuest.",
+  "image": "https://castquest.xyz/badges/early-messenger.png",
+  "attributes": [
+    { "trait_type": "Category", "value": "Social" },
+    { "trait_type": "Rarity", "value": "Common" }
+  ]
+}
