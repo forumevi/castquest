@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { createWalletClient, http } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import { base } from "viem/chains"
-import abi from "../../../abi/CastQuestBadges.json"
+import CastQuestABI from "../../../abi/CastQuestBadges.json"
 
 const account = privateKeyToAccount(process.env.OWNER_PRIVATE_KEY as `0x${string}`)
 
