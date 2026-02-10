@@ -21,7 +21,8 @@ export async function POST(req: Request) {
     address: process.env.CONTRACT_ADDRESS as `0x${string}`,
     abi: CastQuestABI,
     functionName: "mintBadge",
-    args: [wallet, tokenURI]
+    args: [wallet as `0x${string}`, tokenURI],
+    chain: base   // ⭐ TypeScript'in ağlamaması için ekledik
   })
 
   return NextResponse.json({ success: true, tx: hash })
