@@ -1,7 +1,7 @@
 {
   "name": "Mission Runner",
   "description": "Completed multiple missions on CastQuest.",
-  "image": "https://castquest.xyz/badges/mission-runner.png",
+  "image": "https://castquest.vercel.app/badges/mission-runner.png",
   "attributes": [
     { "trait_type": "Category", "value": "Milestone" },
     { "trait_type": "Rarity", "value": "Rare" }
