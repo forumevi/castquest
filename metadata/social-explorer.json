@@ -1,7 +1,7 @@
 {
   "name": "Social Explorer",
   "description": "Earned by engaging with the Farcaster community.",
-  "image": "https://castquest.xyz/badges/social-explorer.png",
+  "image": "https://castquest.vercel.app/badges/social-explorer.png",
   "attributes": [
     { "trait_type": "Category", "value": "Social" },
     { "trait_type": "Rarity", "value": "Common" }
