@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server"
 
-// Badge verilerini bir yerde topluyoruz
-const badgesData = [
-  {
-    id: "1",
+// Badge verilerini buraya ekliyoruz
+const badges: Record<string, any> = {
+  "genesis-explorer": {
     name: "Genesis Explorer",
     description: "Awarded for completing your first missions on CastQuest.",
     image: "https://castquest.vercel.app/badges/genesis-explorer.png",
@@ -11,39 +10,21 @@ const badgesData = [
       { trait_type: "Tier", value: "Genesis" },
       { trait_type: "Type", value: "Explorer" }
     ]
-  },
-  {
-    id: "2",
-    name: "Master Explorer",
-    description: "Awarded for completing 10 missions on CastQuest.",
-    image: "https://castquest.vercel.app/badges/master-explorer.png",
-    attributes: [
-      { trait_type: "Tier", value: "Master" },
-      { trait_type: "Type", value: "Explorer" }
-    ]
-  },
-  {
-    id: "3",
-    name: "Legendary Explorer",
-    description: "Awarded for completing all missions on CastQuest.",
-    image: "https://castquest.vercel.app/badges/legendary-explorer.png",
-    attributes: [
-      { trait_type: "Tier", value: "Legendary" },
-      { trait_type: "Type", value: "Explorer" }
-    ]
   }
-]
-
-// ID ile badge’i bulma fonksiyonu
-function getBadgeById(id: string) {
-  return badgesData.find((badge) => badge.id === id)
 }
 
+// GET metodu
 export async function GET(
-  req: Request,
+  _req: Request,
   { params }: { params: { id: string } }
 ) {
-  const badge = getBadgeById(params.id)
+  // params.id alımı için güvenli kontrol
+  const id = params?.id
+  if (!id) {
+    return NextResponse.json({ error: "Badge ID missing" }, { status: 400 })
+  }
+
+  const badge = badges[id]
 
   if (!badge) {
     return NextResponse.json({ error: "Badge not found" }, { status: 404 })
