@@ -55,21 +55,32 @@ export default function Missions() {
         <strong>{t.xp}: {xp}</strong>
       </div>
 
-      {xp >= 50 && (
-  <div style={{
-    marginBottom: 20,
-    padding: 12,
-    border: "1px solid gold",
-    borderRadius: 8
-  }}>
+     {xp >= 50 && (
+  <div style={{ marginBottom: 20, padding: 12, border: "1px solid gold" }}>
     <p>🏆 {t.badgeUnlocked}</p>
-    <img
-      src="/badges/genesis-explorer.png"
-      alt="Genesis Explorer Badge"
-      width={120}
-    />
+    <img src="/badges/genesis-explorer.png" width={120} />
+
+    <button
+      onClick={async () => {
+        const wallet = localStorage.getItem("wallet")
+        const res = await fetch("/api/mint", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            wallet,
+            badgeId: "genesis-explorer"
+          })
+        })
+        const data = await res.json()
+        alert("Minted! TX: " + data.tx)
+      }}
+      style={{ display: "block", marginTop: 10 }}
+    >
+      Mint Badge NFT
+    </button>
   </div>
 )}
+
 
 
       {missions.map(m => {
