@@ -1,7 +1,7 @@
 {
   "name": "Proof of Action",
   "description": "Completed a swap on Base and shared it on Farcaster.",
-  "image": "https://castquest.xyz/badges/proof-of-action.png",
+  "image": "https://castquest.vercel.app/badges/proof-of-action.png",
   "attributes": [
     { "trait_type": "Category", "value": "Combo" },
     { "trait_type": "Rarity", "value": "Epic" }
