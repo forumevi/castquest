@@ -14,7 +14,6 @@ export default function Home() {
 function Main() {
   const { address, isConnected } = useAccount()
 
-  // Wallet bağlanınca localStorage'a kaydet
   useEffect(() => {
     if (isConnected && address) {
       localStorage.setItem("wallet", address)
