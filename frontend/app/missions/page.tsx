@@ -56,10 +56,21 @@ export default function Missions() {
       </div>
 
       {xp >= 50 && (
-        <div style={{ marginBottom: 20, padding: 12, border: "1px solid gold" }}>
-          🏆 {t.badgeUnlocked}: Genesis Explorer
-        </div>
-      )}
+  <div style={{
+    marginBottom: 20,
+    padding: 12,
+    border: "1px solid gold",
+    borderRadius: 8
+  }}>
+    <p>🏆 {t.badgeUnlocked}</p>
+    <img
+      src="/badges/genesis-explorer.png"
+      alt="Genesis Explorer Badge"
+      width={120}
+    />
+  </div>
+)}
+
 
       {missions.map(m => {
         const isDone = completed.includes(m.id)
