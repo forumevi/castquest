@@ -1,0 +1,102 @@
+[
+  {
+    "id": "first_mission",
+    "title_en": "First Step",
+    "title_tr": "İlk Adım",
+    "description_en": "Complete your first mission on CastQuest",
+    "description_tr": "CastQuest’te ilk görevini tamamla",
+    "type": "social",
+    "xp": 20,
+    "badge": "genesis-explorer"
+  },
+  {
+    "id": "reply_one",
+    "title_en": "Say Hello",
+    "title_tr": "Selam Ver",
+    "description_en": "Reply to 1 cast on Farcaster",
+    "description_tr": "Farcaster’da 1 caste yanıt ver",
+    "type": "social",
+    "xp": 15,
+    "badge": "social-spark"
+  },
+  {
+    "id": "reply_three",
+    "title_en": "Join the Conversation",
+    "title_tr": "Sohbete Katıl",
+    "description_en": "Reply to 3 different casts",
+    "description_tr": "3 farklı caste yanıt ver",
+    "type": "social",
+    "xp": 30,
+    "badge": "social-explorer"
+  },
+  {
+    "id": "share_castquest",
+    "title_en": "Spread the Word",
+    "title_tr": "Duyur",
+    "description_en": "Share a cast about CastQuest",
+    "description_tr": "CastQuest hakkında bir cast paylaş",
+    "type": "social",
+    "xp": 25,
+    "badge": "early-messenger"
+  },
+  {
+    "id": "three_day_login",
+    "title_en": "Stay Consistent",
+    "title_tr": "İstikrar",
+    "description_en": "Open CastQuest 3 days in a row",
+    "description_tr": "CastQuest’e 3 gün üst üste gir",
+    "type": "social",
+    "xp": 30,
+    "badge": "daily-caster"
+  },
+  {
+    "id": "first_tx",
+    "title_en": "First Transaction",
+    "title_tr": "İlk İşlem",
+    "description_en": "Make your first transaction on Base",
+    "description_tr": "Base üzerinde ilk işlemini yap",
+    "type": "onchain",
+    "xp": 40,
+    "badge": "base-pathfinder"
+  },
+  {
+    "id": "two_contracts",
+    "title_en": "Onchain Curious",
+    "title_tr": "Onchain Meraklısı",
+    "description_en": "Interact with 2 different smart contracts on Base",
+    "description_tr": "Base üzerinde 2 farklı akıllı kontratla etkileşime gir",
+    "type": "onchain",
+    "xp": 50,
+    "badge": "contract-explorer"
+  },
+  {
+    "id": "three_day_tx",
+    "title_en": "Gas Warrior",
+    "title_tr": "Gas Savaşçısı",
+    "description_en": "Make transactions on 3 different days",
+    "description_tr": "3 farklı gün işlem yap",
+    "type": "onchain",
+    "xp": 60,
+    "badge": "gas-warrior"
+  },
+  {
+    "id": "swap_and_share",
+    "title_en": "Proof of Action",
+    "title_tr": "Aksiyon Kanıtı",
+    "description_en": "Do a swap on Base and share it on Farcaster",
+    "description_tr": "Base’te swap yap ve Farcaster’da paylaş",
+    "type": "combo",
+    "xp": 70,
+    "badge": "proof-of-action"
+  },
+  {
+    "id": "complete_five",
+    "title_en": "Mission Runner",
+    "title_tr": "Görev Koşucusu",
+    "description_en": "Complete 5 total missions",
+    "description_tr": "Toplam 5 görev tamamla",
+    "type": "milestone",
+    "xp": 50,
+    "badge": "mission-runner"
+  }
+]
