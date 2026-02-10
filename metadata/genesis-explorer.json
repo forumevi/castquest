@@ -1,7 +1,7 @@
 {
   "name": "Genesis Explorer",
   "description": "Awarded for completing your first mission on CastQuest.",
-  "image": "https://castquest.xyz/badges/genesis-explorer.png",
+  "image": "https://castquest.vercel.app/badges/genesis-explorer.png",
   "attributes": [
     { "trait_type": "Category", "value": "Genesis" },
     { "trait_type": "Rarity", "value": "Common" }
