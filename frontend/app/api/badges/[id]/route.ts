@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server"
 
-// Badge verilerini ID ile eşleştiriyoruz
-const badges: Record<string, any> = {
-  "1": {
+// Badge verilerini bir yerde topluyoruz
+const badgesData = [
+  {
+    id: "1",
     name: "Genesis Explorer",
     description: "Awarded for completing your first missions on CastQuest.",
     image: "https://castquest.vercel.app/badges/genesis-explorer.png",
@@ -11,7 +12,8 @@ const badges: Record<string, any> = {
       { trait_type: "Type", value: "Explorer" }
     ]
   },
-  "2": {
+  {
+    id: "2",
     name: "Master Explorer",
     description: "Awarded for completing 10 missions on CastQuest.",
     image: "https://castquest.vercel.app/badges/master-explorer.png",
@@ -20,7 +22,8 @@ const badges: Record<string, any> = {
       { trait_type: "Type", value: "Explorer" }
     ]
   },
-  "3": {
+  {
+    id: "3",
     name: "Legendary Explorer",
     description: "Awarded for completing all missions on CastQuest.",
     image: "https://castquest.vercel.app/badges/legendary-explorer.png",
@@ -29,13 +32,18 @@ const badges: Record<string, any> = {
       { trait_type: "Type", value: "Explorer" }
     ]
   }
+]
+
+// ID ile badge’i bulma fonksiyonu
+function getBadgeById(id: string) {
+  return badgesData.find((badge) => badge.id === id)
 }
 
 export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const badge = badges[params.id]
+  const badge = getBadgeById(params.id)
 
   if (!badge) {
     return NextResponse.json({ error: "Badge not found" }, { status: 404 })
