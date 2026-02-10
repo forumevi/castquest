@@ -4,7 +4,6 @@ import { privateKeyToAccount } from "viem/accounts"
 import { base } from "viem/chains"
 import abi from "../../../abi/CastQuestBadges.json"
 
-
 const account = privateKeyToAccount(process.env.OWNER_PRIVATE_KEY as `0x${string}`)
 
 const client = createWalletClient({
