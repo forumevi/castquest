@@ -1,15 +1,18 @@
 "use client"
 import { useEffect, useState } from "react"
+import { translations, Lang } from "../../lib/i18n"
 
 export default function Missions() {
   const [missions, setMissions] = useState<any[]>([])
   const [completed, setCompleted] = useState<string[]>([])
   const [xp, setXp] = useState(0)
+  const [lang, setLang] = useState<Lang>("en")
 
   useEffect(() => {
-    fetch("/api/missions")
-      .then(res => res.json())
-      .then(setMissions)
+    fetch("/api/missions").then(res => res.json()).then(setMissions)
+
+    const savedLang = localStorage.getItem("lang") as Lang
+    if (savedLang) setLang(savedLang)
 
     const saved = localStorage.getItem("completedMissions")
     if (saved) setCompleted(JSON.parse(saved))
@@ -17,6 +20,8 @@ export default function Missions() {
     const savedXp = localStorage.getItem("xp")
     if (savedXp) setXp(Number(savedXp))
   }, [])
+
+  const t = translations[lang]
 
   const completeMission = async (missionId: string) => {
     const wallet = localStorage.getItem("wallet") || "demo-user"
@@ -38,41 +43,21 @@ export default function Missions() {
       setXp(newXp)
       localStorage.setItem("xp", String(newXp))
 
-      alert("Mission completed! +" + data.xpEarned + " XP 🎉")
+      alert("+" + data.xpEarned + " XP 🎉")
     }
   }
 
   return (
     <div style={{ padding: 24 }}>
-      <h2>Missions / Görevler</h2>
+      <h2>{t.missions}</h2>
 
-      {/* XP BAR */}
       <div style={{ marginBottom: 20 }}>
-        <strong>XP: {xp}</strong>
-        <div style={{
-          height: 10,
-          background: "#222",
-          marginTop: 6,
-          borderRadius: 5,
-          overflow: "hidden"
-        }}>
-          <div style={{
-            width: `${Math.min(xp, 100)}%`,
-            background: "#00ff88",
-            height: "100%"
-          }} />
-        </div>
+        <strong>{t.xp}: {xp}</strong>
       </div>
 
-      {/* BADGE UNLOCK */}
       {xp >= 50 && (
-        <div style={{
-          marginBottom: 20,
-          padding: 12,
-          border: "1px solid gold",
-          borderRadius: 8
-        }}>
-          🏆 <strong>Badge Unlocked:</strong> Genesis Explorer
+        <div style={{ marginBottom: 20, padding: 12, border: "1px solid gold" }}>
+          🏆 {t.badgeUnlocked}: Genesis Explorer
         </div>
       )}
 
@@ -80,23 +65,15 @@ export default function Missions() {
         const isDone = completed.includes(m.id)
 
         return (
-          <div
-            key={m.id}
-            style={{
-              border: "1px solid #333",
-              padding: 12,
-              marginBottom: 12,
-              opacity: isDone ? 0.6 : 1
-            }}
-          >
-            <h3>{m.title_en} / {m.title_tr}</h3>
-            <p>{m.description_en}</p>
+          <div key={m.id} style={{ border: "1px solid #333", padding: 12, marginBottom: 12 }}>
+            <h3>{lang === "tr" ? m.title_tr : m.title_en}</h3>
+            <p>{lang === "tr" ? m.description_tr : m.description_en}</p>
 
             {isDone ? (
-              <button disabled>✅ Completed</button>
+              <button disabled>✅ {t.completed}</button>
             ) : (
               <button onClick={() => completeMission(m.id)}>
-                Verify
+                {t.verify}
               </button>
             )}
           </div>
