@@ -5,7 +5,7 @@ export default function Missions() {
   const [missions, setMissions] = useState<any[]>([])
 
   useEffect(() => {
-    fetch(process.env.NEXT_PUBLIC_API_URL + "/missions")
+    fetch("/api/missions")
       .then(res => res.json())
       .then(setMissions)
   }, [])
