@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 export default function Missions() {
   const [missions, setMissions] = useState<any[]>([])
   const [completed, setCompleted] = useState<string[]>([])
+  const [xp, setXp] = useState(0)
 
   useEffect(() => {
     fetch("/api/missions")
@@ -12,6 +13,9 @@ export default function Missions() {
 
     const saved = localStorage.getItem("completedMissions")
     if (saved) setCompleted(JSON.parse(saved))
+
+    const savedXp = localStorage.getItem("xp")
+    if (savedXp) setXp(Number(savedXp))
   }, [])
 
   const completeMission = async (missionId: string) => {
@@ -29,6 +33,11 @@ export default function Missions() {
       const updated = [...completed, missionId]
       setCompleted(updated)
       localStorage.setItem("completedMissions", JSON.stringify(updated))
+
+      const newXp = xp + data.xpEarned
+      setXp(newXp)
+      localStorage.setItem("xp", String(newXp))
+
       alert("Mission completed! +" + data.xpEarned + " XP 🎉")
     }
   }
@@ -36,6 +45,36 @@ export default function Missions() {
   return (
     <div style={{ padding: 24 }}>
       <h2>Missions / Görevler</h2>
+
+      {/* XP BAR */}
+      <div style={{ marginBottom: 20 }}>
+        <strong>XP: {xp}</strong>
+        <div style={{
+          height: 10,
+          background: "#222",
+          marginTop: 6,
+          borderRadius: 5,
+          overflow: "hidden"
+        }}>
+          <div style={{
+            width: `${Math.min(xp, 100)}%`,
+            background: "#00ff88",
+            height: "100%"
+          }} />
+        </div>
+      </div>
+
+      {/* BADGE UNLOCK */}
+      {xp >= 50 && (
+        <div style={{
+          marginBottom: 20,
+          padding: 12,
+          border: "1px solid gold",
+          borderRadius: 8
+        }}>
+          🏆 <strong>Badge Unlocked:</strong> Genesis Explorer
+        </div>
+      )}
 
       {missions.map(m => {
         const isDone = completed.includes(m.id)
