@@ -1,7 +1,7 @@
 {
   "name": "Base Pathfinder",
   "description": "Awarded for completing your first transaction on Base.",
-  "image": "https://castquest.xyz/badges/base-pathfinder.png",
+  "image": "https://castquest.vercel.app/badges/base-pathfinder.png",
   "attributes": [
     { "trait_type": "Category", "value": "Onchain" },
     { "trait_type": "Rarity", "value": "Common" }
