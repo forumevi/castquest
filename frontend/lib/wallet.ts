@@ -4,7 +4,9 @@ import { injected } from "wagmi/connectors"
 
 export const config = createConfig({
   chains: [base],
-  connectors: [injected()],
+  connectors: [
+    injected() // sadece browser wallet (MetaMask, Coinbase Wallet extension vs)
+  ],
   transports: {
     [base.id]: http()
   }
