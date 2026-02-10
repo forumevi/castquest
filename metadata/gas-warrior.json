@@ -1,0 +1,9 @@
+{
+  "name": "Gas Warrior",
+  "description": "Awarded for making transactions on multiple days.",
+  "image": "https://castquest.xyz/badges/gas-warrior.png",
+  "attributes": [
+    { "trait_type": "Category", "value": "Onchain" },
+    { "trait_type": "Rarity", "value": "Rare" }
+  ]
+}
