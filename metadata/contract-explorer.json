@@ -1,0 +1,9 @@
+{
+  "name": "Contract Explorer",
+  "description": "Interacted with multiple smart contracts on Base.",
+  "image": "https://castquest.xyz/badges/contract-explorer.png",
+  "attributes": [
+    { "trait_type": "Category", "value": "Onchain" },
+    { "trait_type": "Rarity", "value": "Rare" }
+  ]
+}
