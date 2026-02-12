@@ -1,31 +1,40 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useAccount, usePublicClient } from "wagmi"
+import { useAccount, useReadContract } from "wagmi"
 import { translations, Lang } from "../../lib/i18n"
 
 const CONTRACT_ADDRESS = "0xb1A1F63b77B45F279F465c8B3c65b131704F3939"
 
 const ABI = [
   {
-    constant: true,
-    inputs: [{ name: "owner", type: "address" }],
     name: "balanceOf",
-    outputs: [{ name: "", type: "uint256" }],
     type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "owner", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
   },
-]
+] as const
 
 export default function Missions() {
   const { address, isConnected } = useAccount()
-  const publicClient = usePublicClient()
 
   const [missions, setMissions] = useState<any[]>([])
   const [completed, setCompleted] = useState<string[]>([])
   const [xp, setXp] = useState(0)
   const [lang, setLang] = useState<Lang>("en")
-  const [hasNFT, setHasNFT] = useState(false)
-  const [checkingNFT, setCheckingNFT] = useState(false)
+
+  const { data: balance } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address,
+    },
+  })
+
+  const hasNFT = balance ? Number(balance) > 0 : false
 
   useEffect(() => {
     fetch("/api/missions")
@@ -41,33 +50,6 @@ export default function Missions() {
     const savedXp = localStorage.getItem("xp")
     if (savedXp) setXp(Number(savedXp))
   }, [])
-
-  // 🔥 REAL ONCHAIN NFT CHECK
-  useEffect(() => {
-    if (!isConnected || !address || !publicClient) return
-
-    const checkNFT = async () => {
-      try {
-        setCheckingNFT(true)
-
-        const balance = await publicClient.readContract({
-          address: CONTRACT_ADDRESS as `0x${string}`,
-          abi: ABI,
-          functionName: "balanceOf",
-          args: [address],
-        }) as bigint
-
-        setHasNFT(Number(balance) > 0)
-      } catch (err) {
-        console.error("NFT check error:", err)
-        setHasNFT(false)
-      } finally {
-        setCheckingNFT(false)
-      }
-    }
-
-    checkNFT()
-  }, [address, isConnected, publicClient])
 
   const t = translations[lang]
 
@@ -108,9 +90,7 @@ export default function Missions() {
           <p>🏆 {t.badgeUnlocked}</p>
           <img src="/badges/genesis-explorer.png" width={120} />
 
-          {checkingNFT ? (
-            <p>Checking NFT ownership...</p>
-          ) : hasNFT ? (
+          {hasNFT ? (
             <button disabled>✅ Badge Minted</button>
           ) : (
             <button
@@ -126,8 +106,6 @@ export default function Missions() {
 
                 const data = await res.json()
                 alert("Minted! TX: " + data.tx)
-
-                setHasNFT(true)
               }}
               style={{ display: "block", marginTop: 10 }}
             >
