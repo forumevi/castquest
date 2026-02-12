@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server"
 
-// Badge verilerini buraya ekliyoruz
 const badges: Record<string, any> = {
-  "genesis-explorer": {
+  "1": {
     name: "Genesis Explorer",
     description: "Awarded for completing your first missions on CastQuest.",
     image: "https://castquest.vercel.app/badges/genesis-explorer.png",
@@ -10,21 +9,32 @@ const badges: Record<string, any> = {
       { trait_type: "Tier", value: "Genesis" },
       { trait_type: "Type", value: "Explorer" }
     ]
+  },
+  "2": {
+    name: "Dungeon Scout",
+    description: "Completed your first dungeon quest.",
+    image: "https://castquest.vercel.app/badges/dungeon-scout.png",
+    attributes: [
+      { trait_type: "Tier", value: "Bronze" },
+      { trait_type: "Type", value: "Scout" }
+    ]
+  },
+  "3": {
+    name: "Lore Seeker",
+    description: "Discovered hidden lore within CastQuest.",
+    image: "https://castquest.vercel.app/badges/lore-seeker.png",
+    attributes: [
+      { trait_type: "Tier", value: "Silver" },
+      { trait_type: "Type", value: "Scholar" }
+    ]
   }
 }
 
-// GET metodu
 export async function GET(
   _req: Request,
   { params }: { params: { id: string } }
 ) {
-  // params.id alımı için güvenli kontrol
-  const id = params?.id
-  if (!id) {
-    return NextResponse.json({ error: "Badge ID missing" }, { status: 400 })
-  }
-
-  const badge = badges[id]
+  const badge = badges[params.id]
 
   if (!badge) {
     return NextResponse.json({ error: "Badge not found" }, { status: 404 })
