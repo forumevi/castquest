@@ -1,12 +1,16 @@
 "use client"
 
 import "@rainbow-me/rainbowkit/styles.css"
+import { ReactNode } from "react"
 
-import { WagmiConfig } from "wagmi"
-import { RainbowKitProvider, getDefaultWallets } from "@rainbow-me/rainbowkit"
-import { configureChains, createConfig } from "wagmi"
+import { WagmiConfig, configureChains, createConfig } from "wagmi"
 import { base } from "wagmi/chains"
 import { publicProvider } from "wagmi/providers/public"
+
+import {
+  RainbowKitProvider,
+  getDefaultWallets
+} from "@rainbow-me/rainbowkit"
 
 const { chains, publicClient } = configureChains(
   [base],
@@ -15,7 +19,7 @@ const { chains, publicClient } = configureChains(
 
 const { connectors } = getDefaultWallets({
   appName: "CastQuest",
-  projectId: "YOUR_WALLETCONNECT_PROJECT_ID", // aşağıyı oku
+  projectId: "BURAYA_WALLETCONNECT_PROJECT_ID_YAPIŞTIR",
   chains
 })
 
@@ -25,11 +29,7 @@ const wagmiConfig = createConfig({
   publicClient
 })
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
