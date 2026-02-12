@@ -36,12 +36,13 @@ export async function POST(req: Request) {
       )
     }
 
-   const balance = await publicClient.readContract({
+   const balance = await (publicClient.readContract as any)({
   address: CONTRACT_ADDRESS,
   abi: CastQuestABI,
   functionName: "balanceOf",
   args: [wallet as `0x${string}`],
 }) as bigint
+
 
 
     if (Number(balance) > 0) {
