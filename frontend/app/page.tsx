@@ -36,7 +36,7 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           wallet: address,
-          badgeId: "genesis-explorer",
+          badgeSlug: "genesis-explorer", // ✅ FIX BURADA
         }),
       })
 
@@ -46,6 +46,8 @@ export default function Home() {
         const metaRes = await fetch(`/api/badges/genesis-explorer`)
         const metadata = await metaRes.json()
         setMintedBadge(metadata)
+      } else {
+        console.error(data)
       }
     } catch (err) {
       console.error(err)
