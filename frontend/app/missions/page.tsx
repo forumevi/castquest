@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import { useAccount, usePublicClient } from "wagmi"
 import { translations, Lang } from "../../lib/i18n"
-import { formatEther } from "viem"
 
 const CONTRACT_ADDRESS = "0xb1A1F63b77B45F279F465c8B3c65b131704F3939"
 
@@ -29,7 +28,9 @@ export default function Missions() {
   const [checkingNFT, setCheckingNFT] = useState(false)
 
   useEffect(() => {
-    fetch("/api/missions").then(res => res.json()).then(setMissions)
+    fetch("/api/missions")
+      .then(res => res.json())
+      .then(setMissions)
 
     const savedLang = localStorage.getItem("lang") as Lang
     if (savedLang) setLang(savedLang)
@@ -49,20 +50,17 @@ export default function Missions() {
       try {
         setCheckingNFT(true)
 
-        const balance: bigint = await publicClient.readContract({
+        const balance = await publicClient.readContract({
           address: CONTRACT_ADDRESS as `0x${string}`,
           abi: ABI,
           functionName: "balanceOf",
           args: [address],
-        })
+        }) as bigint
 
-        if (Number(balance) > 0) {
-          setHasNFT(true)
-        } else {
-          setHasNFT(false)
-        }
+        setHasNFT(Number(balance) > 0)
       } catch (err) {
         console.error("NFT check error:", err)
+        setHasNFT(false)
       } finally {
         setCheckingNFT(false)
       }
@@ -79,7 +77,7 @@ export default function Missions() {
     const res = await fetch("/api/complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ missionId, wallet })
+      body: JSON.stringify({ missionId, wallet }),
     })
 
     const data = await res.json()
@@ -122,8 +120,8 @@ export default function Missions() {
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                     wallet: address,
-                    badgeId: "genesis-explorer"
-                  })
+                    badgeId: "genesis-explorer",
+                  }),
                 })
 
                 const data = await res.json()
@@ -139,11 +137,18 @@ export default function Missions() {
         </div>
       )}
 
-      {missions.map(m => {
+      {missions.map((m) => {
         const isDone = completed.includes(m.id)
 
         return (
-          <div key={m.id} style={{ border: "1px solid #333", padding: 12, marginBottom: 12 }}>
+          <div
+            key={m.id}
+            style={{
+              border: "1px solid #333",
+              padding: 12,
+              marginBottom: 12,
+            }}
+          >
             <h3>{lang === "tr" ? m.title_tr : m.title_en}</h3>
             <p>{lang === "tr" ? m.description_tr : m.description_en}</p>
 
