@@ -17,7 +17,7 @@ const account = privateKeyToAccount(PRIVATE_KEY)
 const client = createWalletClient({
   account,
   chain: base,
-  transport: http(RPC_URL), // 🔥 RPC artık zorunlu
+  transport: http(RPC_URL),
 })
 
 export async function POST(req: Request) {
@@ -34,6 +34,8 @@ export async function POST(req: Request) {
     const tokenURI = `https://castquest.vercel.app/api/badges/${badgeId}`
 
     const hash = await client.writeContract({
+      chain: base,        // ✅ TypeScript için gerekli
+      account,            // ✅ TypeScript için gerekli
       address: CONTRACT_ADDRESS,
       abi: CastQuestABI,
       functionName: "mintBadge",
@@ -44,8 +46,12 @@ export async function POST(req: Request) {
 
   } catch (err: any) {
     console.error("MINT ERROR:", err)
+
     return NextResponse.json(
-      { error: "Mint failed", details: err.message },
+      {
+        error: "Mint failed",
+        details: err?.shortMessage || err?.message || "Unknown error"
+      },
       { status: 500 }
     )
   }
