@@ -36,13 +36,13 @@ export async function POST(req: Request) {
       )
     }
 
-    // 🔥 DOUBLE MINT KORUMASI
-    const balance: bigint = await publicClient.readContract({
-      address: CONTRACT_ADDRESS,
-      abi: CastQuestABI,
-      functionName: "balanceOf",
-      args: [wallet as `0x${string}`],
-    })
+   const balance = await publicClient.readContract({
+  address: CONTRACT_ADDRESS,
+  abi: CastQuestABI,
+  functionName: "balanceOf",
+  args: [wallet as `0x${string}`],
+}) as bigint
+
 
     if (Number(balance) > 0) {
       return NextResponse.json(
