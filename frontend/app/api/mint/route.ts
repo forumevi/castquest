@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { createWalletClient, http } from "viem"
+import { createWalletClient, createPublicClient, http } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import { base } from "viem/chains"
 import CastQuestABI from "../../../abi/CastQuestBadges.json"
@@ -14,8 +14,13 @@ if (!PRIVATE_KEY || !CONTRACT_ADDRESS || !RPC_URL) {
 
 const account = privateKeyToAccount(PRIVATE_KEY)
 
-const client = createWalletClient({
+const walletClient = createWalletClient({
   account,
+  chain: base,
+  transport: http(RPC_URL),
+})
+
+const publicClient = createPublicClient({
   chain: base,
   transport: http(RPC_URL),
 })
@@ -31,11 +36,26 @@ export async function POST(req: Request) {
       )
     }
 
+    // 🔥 DOUBLE MINT KORUMASI
+    const balance: bigint = await publicClient.readContract({
+      address: CONTRACT_ADDRESS,
+      abi: CastQuestABI,
+      functionName: "balanceOf",
+      args: [wallet as `0x${string}`],
+    })
+
+    if (Number(balance) > 0) {
+      return NextResponse.json(
+        { error: "User already minted this badge" },
+        { status: 400 }
+      )
+    }
+
     const tokenURI = `https://castquest.vercel.app/api/badges/${badgeId}`
 
-    const hash = await client.writeContract({
-      chain: base,        // ✅ TypeScript için gerekli
-      account,            // ✅ TypeScript için gerekli
+    const hash = await walletClient.writeContract({
+      chain: base,
+      account,
       address: CONTRACT_ADDRESS,
       abi: CastQuestABI,
       functionName: "mintBadge",
