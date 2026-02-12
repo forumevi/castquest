@@ -1,19 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { WagmiConfig, useAccount, useConnect, useDisconnect } from "wagmi"
-import { config } from "../lib/wallet"
+import { useAccount, useConnect, useDisconnect } from "wagmi"
 import { translations, Lang } from "../lib/i18n"
 
 export default function Home() {
-  return (
-    <WagmiConfig config={config}>
-      <Main />
-    </WagmiConfig>
-  )
-}
-
-function Main() {
   const { address, isConnected } = useAccount()
   const { connect, connectors } = useConnect()
   const { disconnect } = useDisconnect()
@@ -29,7 +20,6 @@ function Main() {
 
   return (
     <div style={{ padding: 24 }}>
-
       <h1>🧭 {t.title}</h1>
 
       {!isConnected ? (
