@@ -1,17 +1,32 @@
 "use client"
+
 import { useEffect, useState } from "react"
-import { useAccount } from "wagmi"
+import { useAccount, usePublicClient } from "wagmi"
 import { translations, Lang } from "../../lib/i18n"
+import { formatEther } from "viem"
+
+const CONTRACT_ADDRESS = "0xb1A1F63b77B45F279F465c8B3c65b131704F3939"
+
+const ABI = [
+  {
+    constant: true,
+    inputs: [{ name: "owner", type: "address" }],
+    name: "balanceOf",
+    outputs: [{ name: "", type: "uint256" }],
+    type: "function",
+  },
+]
 
 export default function Missions() {
   const { address, isConnected } = useAccount()
+  const publicClient = usePublicClient()
 
   const [missions, setMissions] = useState<any[]>([])
   const [completed, setCompleted] = useState<string[]>([])
   const [xp, setXp] = useState(0)
   const [lang, setLang] = useState<Lang>("en")
-  const [minting, setMinting] = useState(false)
-  const [minted, setMinted] = useState(false)
+  const [hasNFT, setHasNFT] = useState(false)
+  const [checkingNFT, setCheckingNFT] = useState(false)
 
   useEffect(() => {
     fetch("/api/missions").then(res => res.json()).then(setMissions)
@@ -24,23 +39,47 @@ export default function Missions() {
 
     const savedXp = localStorage.getItem("xp")
     if (savedXp) setXp(Number(savedXp))
-
-    const savedMint = localStorage.getItem("genesisMinted")
-    if (savedMint === "true") setMinted(true)
   }, [])
+
+  // 🔥 REAL ONCHAIN NFT CHECK
+  useEffect(() => {
+    if (!isConnected || !address || !publicClient) return
+
+    const checkNFT = async () => {
+      try {
+        setCheckingNFT(true)
+
+        const balance: bigint = await publicClient.readContract({
+          address: CONTRACT_ADDRESS as `0x${string}`,
+          abi: ABI,
+          functionName: "balanceOf",
+          args: [address],
+        })
+
+        if (Number(balance) > 0) {
+          setHasNFT(true)
+        } else {
+          setHasNFT(false)
+        }
+      } catch (err) {
+        console.error("NFT check error:", err)
+      } finally {
+        setCheckingNFT(false)
+      }
+    }
+
+    checkNFT()
+  }, [address, isConnected, publicClient])
 
   const t = translations[lang]
 
   const completeMission = async (missionId: string) => {
-    if (!isConnected || !address) {
-      alert("Connect wallet first")
-      return
-    }
+    const wallet = address || "demo-user"
 
     const res = await fetch("/api/complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ missionId, wallet: address })
+      body: JSON.stringify({ missionId, wallet })
     })
 
     const data = await res.json()
@@ -53,35 +92,8 @@ export default function Missions() {
       const newXp = xp + data.xpEarned
       setXp(newXp)
       localStorage.setItem("xp", String(newXp))
-    }
-  }
 
-  const mintBadge = async () => {
-    if (!address || minted) return
-
-    try {
-      setMinting(true)
-
-      const res = await fetch("/api/mint", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          wallet: address,
-          badgeSlug: "genesis-explorer"
-        })
-      })
-
-      const data = await res.json()
-
-      if (data.success) {
-        setMinted(true)
-        localStorage.setItem("genesisMinted", "true")
-      }
-
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setMinting(false)
+      alert("+" + data.xpEarned + " XP 🎉")
     }
   }
 
@@ -93,29 +105,40 @@ export default function Missions() {
         <strong>{t.xp}: {xp}</strong>
       </div>
 
-      {/* Badge Unlock */}
-      {xp >= 50 && (
-        <div style={{ marginBottom: 20, padding: 16, border: "2px solid gold", borderRadius: 12 }}>
+      {xp >= 50 && isConnected && (
+        <div style={{ marginBottom: 20, padding: 12, border: "1px solid gold" }}>
           <p>🏆 {t.badgeUnlocked}</p>
           <img src="/badges/genesis-explorer.png" width={120} />
 
-          {!minted ? (
+          {checkingNFT ? (
+            <p>Checking NFT ownership...</p>
+          ) : hasNFT ? (
+            <button disabled>✅ Badge Minted</button>
+          ) : (
             <button
-              onClick={mintBadge}
-              disabled={minting || !isConnected}
+              onClick={async () => {
+                const res = await fetch("/api/mint", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    wallet: address,
+                    badgeId: "genesis-explorer"
+                  })
+                })
+
+                const data = await res.json()
+                alert("Minted! TX: " + data.tx)
+
+                setHasNFT(true)
+              }}
               style={{ display: "block", marginTop: 10 }}
             >
-              {minting ? "Minting..." : "Claim Genesis Badge"}
-            </button>
-          ) : (
-            <button disabled style={{ display: "block", marginTop: 10 }}>
-              ✅ Badge Minted
+              Mint Badge NFT
             </button>
           )}
         </div>
       )}
 
-      {/* Missions */}
       {missions.map(m => {
         const isDone = completed.includes(m.id)
 
@@ -127,7 +150,7 @@ export default function Missions() {
             {isDone ? (
               <button disabled>✅ {t.completed}</button>
             ) : (
-              <button onClick={() => completeMission(m.id)} disabled={!isConnected}>
+              <button onClick={() => completeMission(m.id)}>
                 {t.verify}
               </button>
             )}
