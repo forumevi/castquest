@@ -1,12 +1,17 @@
 "use client"
 import { useEffect, useState } from "react"
+import { useAccount } from "wagmi"
 import { translations, Lang } from "../../lib/i18n"
 
 export default function Missions() {
+  const { address, isConnected } = useAccount()
+
   const [missions, setMissions] = useState<any[]>([])
   const [completed, setCompleted] = useState<string[]>([])
   const [xp, setXp] = useState(0)
   const [lang, setLang] = useState<Lang>("en")
+  const [minting, setMinting] = useState(false)
+  const [minted, setMinted] = useState(false)
 
   useEffect(() => {
     fetch("/api/missions").then(res => res.json()).then(setMissions)
@@ -19,17 +24,23 @@ export default function Missions() {
 
     const savedXp = localStorage.getItem("xp")
     if (savedXp) setXp(Number(savedXp))
+
+    const savedMint = localStorage.getItem("genesisMinted")
+    if (savedMint === "true") setMinted(true)
   }, [])
 
   const t = translations[lang]
 
   const completeMission = async (missionId: string) => {
-    const wallet = localStorage.getItem("wallet") || "demo-user"
+    if (!isConnected || !address) {
+      alert("Connect wallet first")
+      return
+    }
 
     const res = await fetch("/api/complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ missionId, wallet })
+      body: JSON.stringify({ missionId, wallet: address })
     })
 
     const data = await res.json()
@@ -42,8 +53,35 @@ export default function Missions() {
       const newXp = xp + data.xpEarned
       setXp(newXp)
       localStorage.setItem("xp", String(newXp))
+    }
+  }
 
-      alert("+" + data.xpEarned + " XP 🎉")
+  const mintBadge = async () => {
+    if (!address || minted) return
+
+    try {
+      setMinting(true)
+
+      const res = await fetch("/api/mint", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          wallet: address,
+          badgeSlug: "genesis-explorer"
+        })
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
+        setMinted(true)
+        localStorage.setItem("genesisMinted", "true")
+      }
+
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setMinting(false)
     }
   }
 
@@ -55,34 +93,29 @@ export default function Missions() {
         <strong>{t.xp}: {xp}</strong>
       </div>
 
-     {xp >= 50 && (
-  <div style={{ marginBottom: 20, padding: 12, border: "1px solid gold" }}>
-    <p>🏆 {t.badgeUnlocked}</p>
-    <img src="/badges/genesis-explorer.png" width={120} />
+      {/* Badge Unlock */}
+      {xp >= 50 && (
+        <div style={{ marginBottom: 20, padding: 16, border: "2px solid gold", borderRadius: 12 }}>
+          <p>🏆 {t.badgeUnlocked}</p>
+          <img src="/badges/genesis-explorer.png" width={120} />
 
-    <button
-      onClick={async () => {
-        const wallet = localStorage.getItem("wallet")
-        const res = await fetch("/api/mint", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            wallet,
-            badgeId: "genesis-explorer"
-          })
-        })
-        const data = await res.json()
-        alert("Minted! TX: " + data.tx)
-      }}
-      style={{ display: "block", marginTop: 10 }}
-    >
-      Mint Badge NFT
-    </button>
-  </div>
-)}
+          {!minted ? (
+            <button
+              onClick={mintBadge}
+              disabled={minting || !isConnected}
+              style={{ display: "block", marginTop: 10 }}
+            >
+              {minting ? "Minting..." : "Claim Genesis Badge"}
+            </button>
+          ) : (
+            <button disabled style={{ display: "block", marginTop: 10 }}>
+              ✅ Badge Minted
+            </button>
+          )}
+        </div>
+      )}
 
-
-
+      {/* Missions */}
       {missions.map(m => {
         const isDone = completed.includes(m.id)
 
@@ -94,7 +127,7 @@ export default function Missions() {
             {isDone ? (
               <button disabled>✅ {t.completed}</button>
             ) : (
-              <button onClick={() => completeMission(m.id)}>
+              <button onClick={() => completeMission(m.id)} disabled={!isConnected}>
                 {t.verify}
               </button>
             )}
