@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { WagmiConfig, useAccount, useConnect, useDisconnect } from "wagmi"
-import { InjectedConnector } from "wagmi/connectors/injected"
 import { config } from "../lib/wallet"
 import { translations, Lang } from "../lib/i18n"
 
@@ -16,9 +15,7 @@ export default function Home() {
 
 function Main() {
   const { address, isConnected } = useAccount()
-  const { connect } = useConnect({
-    connector: new InjectedConnector(),
-  })
+  const { connect, connectors } = useConnect()
   const { disconnect } = useDisconnect()
 
   const [lang, setLang] = useState<Lang>("en")
@@ -36,8 +33,8 @@ function Main() {
       <h1>🧭 {t.title}</h1>
 
       {!isConnected ? (
-        <button onClick={() => connect()}>
-          Connect MetaMask
+        <button onClick={() => connect({ connector: connectors[0] })}>
+          Connect Wallet
         </button>
       ) : (
         <>
