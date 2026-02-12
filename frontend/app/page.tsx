@@ -12,6 +12,7 @@ export default function Home() {
   const [lang, setLang] = useState<Lang>("en")
   const [mintedBadge, setMintedBadge] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [mintSuccess, setMintSuccess] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem("lang") as Lang
@@ -26,31 +27,36 @@ export default function Home() {
   }
 
   const mintBadge = async () => {
-    if (!address) return
+    if (!address || mintSuccess) return
 
     try {
       setLoading(true)
+      setMintSuccess(false)
 
       const res = await fetch("/api/mint", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           wallet: address,
-          badgeSlug: "genesis-explorer", // ✅ FIX BURADA
+          badgeSlug: "genesis-explorer",
         }),
       })
 
       const data = await res.json()
 
       if (data.success) {
+        setMintSuccess(true)
+
         const metaRes = await fetch(`/api/badges/genesis-explorer`)
         const metadata = await metaRes.json()
         setMintedBadge(metadata)
       } else {
-        console.error(data)
+        alert("Mint failed")
       }
+
     } catch (err) {
       console.error(err)
+      alert("Something went wrong")
     } finally {
       setLoading(false)
     }
@@ -90,20 +96,31 @@ export default function Home() {
       <h2 style={{ marginTop: 30 }}>{t.title}</h2>
       <p>{t.subtitle}</p>
 
-      {/* Mint */}
+      {/* Mint Section */}
       {isConnected && (
-        <button
-          onClick={mintBadge}
-          disabled={loading}
-          style={{
-            marginTop: 20,
-            padding: 12,
-            borderRadius: 8,
-            cursor: "pointer",
-          }}
-        >
-          {loading ? "Minting..." : "Mint Genesis Badge"}
-        </button>
+        <div style={{ marginTop: 20 }}>
+          <button
+            onClick={mintBadge}
+            disabled={loading || mintSuccess}
+            style={{
+              padding: 12,
+              borderRadius: 8,
+              cursor: loading || mintSuccess ? "not-allowed" : "pointer",
+            }}
+          >
+            {loading
+              ? "Minting..."
+              : mintSuccess
+              ? "Minted ✅"
+              : "Mint Genesis Badge"}
+          </button>
+
+          {mintSuccess && (
+            <p style={{ marginTop: 10, color: "green" }}>
+              🎉 Badge successfully minted!
+            </p>
+          )}
+        </div>
       )}
 
       {/* NFT Preview */}
