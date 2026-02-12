@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { WagmiConfig, useAccount } from "wagmi"
+import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { config } from "../lib/wallet"
 import { translations, Lang } from "../lib/i18n"
 
@@ -81,12 +82,17 @@ function Main() {
       <h1>🧭 {t.title}</h1>
       <p>{t.subtitle}</p>
 
+      {/* 🔌 WALLET CONNECT BUTTON */}
+      <div style={{ marginBottom: 20 }}>
+        <ConnectButton />
+      </div>
+
       {isConnected ? (
         <>
           <p>Connected: {address}</p>
 
           <button
-            onClick={() => mintBadge("1")}
+            onClick={() => mintBadge("genesis-explorer")}
             disabled={loading}
             style={{
               marginTop: 20,
@@ -134,7 +140,6 @@ function Main() {
       <div style={{ marginTop: 40 }}>
         <a href="/missions">{t.missions} →</a>
       </div>
-
     </div>
   )
 }
