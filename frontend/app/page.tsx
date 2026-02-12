@@ -1,17 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { WagmiConfig, useAccount } from "wagmi"
+import { useAccount } from "wagmi"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
-import { config } from "../lib/wallet"
 import { translations, Lang } from "../lib/i18n"
 
 export default function Home() {
-  return (
-    <WagmiConfig config={config}>
-      <Main />
-    </WagmiConfig>
-  )
+  return <Main />
 }
 
 function Main() {
@@ -48,10 +43,7 @@ function Main() {
       const res = await fetch("/api/mint", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          wallet: address,
-          badgeId
-        })
+        body: JSON.stringify({ wallet: address, badgeId })
       })
 
       const data = await res.json()
@@ -71,44 +63,36 @@ function Main() {
   return (
     <div style={{ padding: 24 }}>
 
-      {/* Language Switch */}
-      <div style={{ marginBottom: 20 }}>
-        <button onClick={() => chooseLang("en")}>🇬🇧 English</button>
-        <button onClick={() => chooseLang("tr")} style={{ marginLeft: 10 }}>
-          🇹🇷 Türkçe
-        </button>
-      </div>
+      {/* Top Bar */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <button onClick={() => chooseLang("en")}>🇬🇧 English</button>
+          <button onClick={() => chooseLang("tr")} style={{ marginLeft: 10 }}>
+            🇹🇷 Türkçe
+          </button>
+        </div>
 
-      <h1>🧭 {t.title}</h1>
-      <p>{t.subtitle}</p>
-
-      {/* 🔌 WALLET CONNECT BUTTON */}
-      <div style={{ marginBottom: 20 }}>
         <ConnectButton />
       </div>
 
-      {isConnected ? (
-        <>
-          <p>Connected: {address}</p>
+      <h1 style={{ marginTop: 20 }}>🧭 {t.title}</h1>
+      <p>{t.subtitle}</p>
 
-          <button
-            onClick={() => mintBadge("genesis-explorer")}
-            disabled={loading}
-            style={{
-              marginTop: 20,
-              padding: 10,
-              borderRadius: 8,
-              cursor: "pointer"
-            }}
-          >
-            {loading ? "Minting..." : "Mint Genesis Badge"}
-          </button>
-        </>
-      ) : (
-        <p>Wallet not connected</p>
+      {isConnected && (
+        <button
+          onClick={() => mintBadge("genesis-explorer")}
+          disabled={loading}
+          style={{
+            marginTop: 20,
+            padding: 12,
+            borderRadius: 8,
+            cursor: "pointer"
+          }}
+        >
+          {loading ? "Minting..." : "Mint Genesis Badge"}
+        </button>
       )}
 
-      {/* NFT Preview */}
       {mintedBadge && (
         <div
           style={{
