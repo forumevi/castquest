@@ -92,7 +92,8 @@ export default function Missions() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           wallet: address,
-          badgeId: "genesis-explorer",
+          badgeId: "1",
+
         }),
       })
 
