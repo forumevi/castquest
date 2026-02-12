@@ -23,8 +23,9 @@ export default function Missions() {
   const [completed, setCompleted] = useState<string[]>([])
   const [xp, setXp] = useState(0)
   const [lang, setLang] = useState<Lang>("en")
+  const [minting, setMinting] = useState(false)
 
-  const { data: balance } = useReadContract({
+  const { data: balance, refetch } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: ABI,
     functionName: "balanceOf",
@@ -77,6 +78,41 @@ export default function Missions() {
     }
   }
 
+  const handleMint = async () => {
+    if (!address) {
+      alert("Wallet not connected")
+      return
+    }
+
+    try {
+      setMinting(true)
+
+      const res = await fetch("/api/mint", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          wallet: address,
+          badgeId: "genesis-explorer",
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!data || !data.tx) {
+        throw new Error("Transaction hash not returned")
+      }
+
+      alert("Mint successful! 🎉\nTX: " + data.tx)
+
+      await refetch() // NFT durumunu güncelle
+    } catch (err: any) {
+      console.error(err)
+      alert("Mint failed ❌\n" + (err.message || "Unknown error"))
+    } finally {
+      setMinting(false)
+    }
+  }
+
   return (
     <div style={{ padding: 24 }}>
       <h2>{t.missions}</h2>
@@ -94,22 +130,11 @@ export default function Missions() {
             <button disabled>✅ Badge Minted</button>
           ) : (
             <button
-              onClick={async () => {
-                const res = await fetch("/api/mint", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    wallet: address,
-                    badgeId: "genesis-explorer",
-                  }),
-                })
-
-                const data = await res.json()
-                alert("Minted! TX: " + data.tx)
-              }}
+              onClick={handleMint}
+              disabled={minting}
               style={{ display: "block", marginTop: 10 }}
             >
-              Mint Badge NFT
+              {minting ? "Minting..." : "Mint Badge NFT"}
             </button>
           )}
         </div>
