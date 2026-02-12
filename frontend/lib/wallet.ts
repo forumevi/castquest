@@ -1,13 +1,11 @@
 import { createConfig, http } from "wagmi"
-import { base } from "wagmi/chains"
+import { mainnet } from "wagmi/chains"
 import { injected } from "wagmi/connectors"
 
 export const config = createConfig({
-  chains: [base],
-  connectors: [
-    injected() // sadece browser wallet (MetaMask, Coinbase Wallet extension vs)
-  ],
+  chains: [mainnet],
   transports: {
-    [base.id]: http()
-  }
+    [mainnet.id]: http(),
+  },
+  connectors: [injected()],
 })
