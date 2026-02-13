@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server"
 import { createPublicClient, http } from "viem"
 import { base } from "viem/chains"
-import { readFile, writeFile } from "fs/promises"
-import path from "path"
 
 const RPC_URL = process.env.RPC_URL as string
+const NEYNAR_API_KEY = process.env.NEYNAR_API_KEY as string
 
 if (!RPC_URL) {
   throw new Error("Missing RPC_URL")
+}
+
+if (!NEYNAR_API_KEY) {
+  throw new Error("Missing NEYNAR_API_KEY")
 }
 
 const publicClient = createPublicClient({
@@ -15,34 +18,11 @@ const publicClient = createPublicClient({
   transport: http(RPC_URL),
 })
 
-// Basit JSON storage (production'da DB olur)
-const DB_PATH = path.join(process.cwd(), "data/users.json")
-
-type User = {
-  wallet: string
-  xp: number
-  missions: string[]
-}
-
-async function loadUsers(): Promise<User[]> {
-  try {
-    const file = await readFile(DB_PATH, "utf-8")
-    return JSON.parse(file)
-  } catch {
-    return []
-  }
-}
-
-async function saveUsers(users: User[]) {
-  await writeFile(DB_PATH, JSON.stringify(users, null, 2))
-}
-
-// XP mapping
-const missionXP: Record<string, number> = {
-  gas_warrior: 20,
-  onchain_curious: 15,
-  first_tx: 15,
-}
+// Temporary memory store (no filesystem)
+const users = new Map<
+  string,
+  { xp: number; missions: string[] }
+>()
 
 export async function POST(req: Request) {
   try {
@@ -55,15 +35,14 @@ export async function POST(req: Request) {
       )
     }
 
-    const users = await loadUsers()
-    let user = users.find(u => u.wallet.toLowerCase() === wallet.toLowerCase())
+    const key = wallet.toLowerCase()
 
-    if (!user) {
-      user = { wallet, xp: 0, missions: [] }
-      users.push(user)
+    if (!users.has(key)) {
+      users.set(key, { xp: 0, missions: [] })
     }
 
-    // 🔥 Zaten yapılmış mı?
+    const user = users.get(key)!
+
     if (user.missions.includes(missionId)) {
       return NextResponse.json(
         { error: "Mission already completed" },
@@ -71,39 +50,64 @@ export async function POST(req: Request) {
       )
     }
 
-    // 🔥 ZİNCİR KONTROLÜ
-    if (missionId === "gas_warrior") {
-      const balance = await publicClient.getBalance({
-        address: wallet as `0x${string}`,
-      })
+    // 🔥 FARCASTER VERIFY
+    if (missionId === "cast_quest") {
 
-      if (balance <= 0n) {
+      const userRes = await fetch(
+        `https://api.neynar.com/v2/farcaster/user/bulk-by-address?addresses=${wallet}`,
+        {
+          headers: {
+            api_key: NEYNAR_API_KEY,
+          },
+        }
+      )
+
+      if (!userRes.ok) {
+        throw new Error("Neynar user fetch failed")
+      }
+
+      const userData = await userRes.json()
+      const fcUsers = userData.users
+
+      if (!fcUsers || fcUsers.length === 0) {
         return NextResponse.json(
-          { error: "No ETH balance detected" },
+          { error: "No Farcaster account linked" },
+          { status: 400 }
+        )
+      }
+
+      const fid = fcUsers[0].fid
+
+      const castsRes = await fetch(
+        `https://api.neynar.com/v2/farcaster/casts?fid=${fid}&limit=10`,
+        {
+          headers: {
+            api_key: NEYNAR_API_KEY,
+          },
+        }
+      )
+
+      if (!castsRes.ok) {
+        throw new Error("Neynar casts fetch failed")
+      }
+
+      const castsData = await castsRes.json()
+
+      const hasCast = castsData.casts?.some((c: any) =>
+        c.text?.toLowerCase().includes("#castquest")
+      )
+
+      if (!hasCast) {
+        return NextResponse.json(
+          { error: "Required cast not found" },
           { status: 400 }
         )
       }
     }
 
-    if (missionId === "first_tx") {
-      const txCount = await publicClient.getTransactionCount({
-        address: wallet as `0x${string}`,
-      })
-
-      if (txCount === 0) {
-        return NextResponse.json(
-          { error: "No transactions found" },
-          { status: 400 }
-        )
-      }
-    }
-
-    // XP ekle
-    const earnedXP = missionXP[missionId] || 10
-    user.xp += earnedXP
+    // XP ver
+    user.xp += 25
     user.missions.push(missionId)
-
-    await saveUsers(users)
 
     return NextResponse.json({
       success: true,
@@ -111,7 +115,7 @@ export async function POST(req: Request) {
       missions: user.missions,
     })
 
-  } catch (err: any) {
+  } catch (err) {
     console.error("VERIFY ERROR:", err)
 
     return NextResponse.json(
