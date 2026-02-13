@@ -5,20 +5,15 @@ import { base } from "viem/chains"
 const RPC_URL = process.env.RPC_URL as string
 const NEYNAR_API_KEY = process.env.NEYNAR_API_KEY as string
 
-if (!RPC_URL) {
-  throw new Error("Missing RPC_URL")
-}
-
-if (!NEYNAR_API_KEY) {
-  throw new Error("Missing NEYNAR_API_KEY")
-}
+if (!RPC_URL) throw new Error("Missing RPC_URL")
+if (!NEYNAR_API_KEY) throw new Error("Missing NEYNAR_API_KEY")
 
 const publicClient = createPublicClient({
   chain: base,
   transport: http(RPC_URL),
 })
 
-// Temporary memory store (no filesystem)
+// Memory store (temporary)
 const users = new Map<
   string,
   { xp: number; missions: string[] }
@@ -50,21 +45,60 @@ export async function POST(req: Request) {
       )
     }
 
-    // 🔥 FARCASTER VERIFY
-    if (missionId === "cast_quest") {
+    // =========================
+    // CHAIN MISSIONS
+    // =========================
 
+    if (missionId === "gas_warrior") {
+      const balance = await publicClient.getBalance({
+        address: wallet as `0x${string}`,
+      })
+
+      if (balance <= 0n) {
+        return NextResponse.json(
+          { error: "No ETH balance detected" },
+          { status: 400 }
+        )
+      }
+    }
+
+    if (missionId === "first_tx") {
+      const txCount = await publicClient.getTransactionCount({
+        address: wallet as `0x${string}`,
+      })
+
+      if (txCount === 0) {
+        return NextResponse.json(
+          { error: "No transactions found" },
+          { status: 400 }
+        )
+      }
+    }
+
+    if (missionId === "onchain_curious") {
+      const txCount = await publicClient.getTransactionCount({
+        address: wallet as `0x${string}`,
+      })
+
+      if (txCount < 2) {
+        return NextResponse.json(
+          { error: "Not enough onchain interactions" },
+          { status: 400 }
+        )
+      }
+    }
+
+    // =========================
+    // FARCASTER MISSION
+    // =========================
+
+    if (missionId === "cast_quest") {
       const userRes = await fetch(
         `https://api.neynar.com/v2/farcaster/user/bulk-by-address?addresses=${wallet}`,
         {
-          headers: {
-            api_key: NEYNAR_API_KEY,
-          },
+          headers: { api_key: NEYNAR_API_KEY },
         }
       )
-
-      if (!userRes.ok) {
-        throw new Error("Neynar user fetch failed")
-      }
 
       const userData = await userRes.json()
       const fcUsers = userData.users
@@ -81,15 +115,9 @@ export async function POST(req: Request) {
       const castsRes = await fetch(
         `https://api.neynar.com/v2/farcaster/casts?fid=${fid}&limit=10`,
         {
-          headers: {
-            api_key: NEYNAR_API_KEY,
-          },
+          headers: { api_key: NEYNAR_API_KEY },
         }
       )
-
-      if (!castsRes.ok) {
-        throw new Error("Neynar casts fetch failed")
-      }
 
       const castsData = await castsRes.json()
 
@@ -105,8 +133,11 @@ export async function POST(req: Request) {
       }
     }
 
-    // XP ver
-    user.xp += 25
+    // =========================
+    // XP
+    // =========================
+
+    user.xp += 20
     user.missions.push(missionId)
 
     return NextResponse.json({
@@ -117,7 +148,6 @@ export async function POST(req: Request) {
 
   } catch (err) {
     console.error("VERIFY ERROR:", err)
-
     return NextResponse.json(
       { error: "Verification failed" },
       { status: 500 }
