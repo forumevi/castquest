@@ -24,6 +24,7 @@ export default function Missions() {
   const [xp, setXp] = useState(0)
   const [lang, setLang] = useState<Lang>("en")
   const [minting, setMinting] = useState(false)
+  const [verifying, setVerifying] = useState<string | null>(null)
 
   const { data: balance, refetch } = useReadContract({
     address: CONTRACT_ADDRESS,
@@ -34,7 +35,6 @@ export default function Missions() {
   })
 
   const hasNFT = balance ? Number(balance) > 0 : false
-
   const t = translations[lang]
 
   // Load missions
@@ -44,7 +44,7 @@ export default function Missions() {
       .then(setMissions)
   }, [])
 
-  // Load user data from backend
+  // Load user data
   useEffect(() => {
     if (!address) return
 
@@ -56,23 +56,36 @@ export default function Missions() {
       })
   }, [address])
 
-  const completeMission = async (missionId: string) => {
-    if (!address) return
+  // 🔥 GERÇEK VERIFY
+  const verifyMission = async (missionId: string) => {
+    if (!address) return alert("Wallet not connected")
 
-    const res = await fetch("/api/user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        wallet: address,
-        missionId,
-        xpEarned: 20,
-      }),
-    })
+    try {
+      setVerifying(missionId)
 
-    const data = await res.json()
+      const res = await fetch("/api/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          wallet: address,
+          missionId,
+        }),
+      })
 
-    setXp(data.xp)
-    setCompleted(data.missions)
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || "Verification failed")
+      }
+
+      setXp(data.xp)
+      setCompleted(data.missions)
+
+    } catch (err: any) {
+      alert("❌ " + err.message)
+    } finally {
+      setVerifying(null)
+    }
   }
 
   const handleMint = async () => {
@@ -97,8 +110,8 @@ export default function Missions() {
       }
 
       alert("Mint successful! 🎉\nTX: " + data.hash)
-
       await refetch()
+
     } catch (err: any) {
       alert("Mint failed ❌\n" + err.message)
     } finally {
@@ -135,6 +148,7 @@ export default function Missions() {
 
       {missions.map((m) => {
         const isDone = completed.includes(m.id)
+        const isLoading = verifying === m.id
 
         return (
           <div key={m.id} style={{ border: "1px solid #333", padding: 12, marginBottom: 12 }}>
@@ -144,8 +158,11 @@ export default function Missions() {
             {isDone ? (
               <button disabled>✅ {t.completed}</button>
             ) : (
-              <button onClick={() => completeMission(m.id)}>
-                {t.verify}
+              <button
+                onClick={() => verifyMission(m.id)}
+                disabled={isLoading}
+              >
+                {isLoading ? "Verifying..." : t.verify}
               </button>
             )}
           </div>
