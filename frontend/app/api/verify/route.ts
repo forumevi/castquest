@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { createPublicClient, http } from "viem"
+import { createPublicClient, http, isAddress } from "viem"
 import { base } from "viem/chains"
 
 const RPC_URL = process.env.RPC_URL as string
@@ -18,7 +18,6 @@ const users = new Map<
   { xp: number; missions: string[] }
 >()
 
-// ✅ missions.json ile birebir aynı
 const validMissions = [
   "first_mission",
   "reply_one",
@@ -36,9 +35,20 @@ export async function POST(req: Request) {
   try {
     const { wallet, missionId } = await req.json()
 
+    // =====================
+    // BASIC VALIDATION
+    // =====================
+
     if (!wallet || !missionId) {
       return NextResponse.json(
         { error: "Missing wallet or missionId" },
+        { status: 400 }
+      )
+    }
+
+    if (!isAddress(wallet)) {
+      return NextResponse.json(
+        { error: "Invalid wallet address" },
         { status: 400 }
       )
     }
@@ -68,46 +78,39 @@ export async function POST(req: Request) {
     let completed = false
 
     // =====================
-    // ONCHAIN MISSIONS
+    // ONCHAIN MISSIONS (REAL CHECK)
     // =====================
 
-    if (missionId === "first_tx") {
+    if (
+      missionId === "first_tx" ||
+      missionId === "two_contracts" ||
+      missionId === "three_day_tx"
+    ) {
       const txCount = await publicClient.getTransactionCount({
         address: wallet as `0x${string}`,
       })
 
-      if (txCount > 0) completed = true
-    }
+      console.log("Wallet:", wallet)
+      console.log("Tx Count:", txCount)
 
-    if (missionId === "two_contracts") {
-      const txCount = await publicClient.getTransactionCount({
-        address: wallet as `0x${string}`,
-      })
-
-      if (txCount >= 2) completed = true
-    }
-
-    if (missionId === "three_day_tx") {
-      const txCount = await publicClient.getTransactionCount({
-        address: wallet as `0x${string}`,
-      })
-
-      if (txCount >= 3) completed = true
+      if (missionId === "first_tx" && txCount > 0) completed = true
+      if (missionId === "two_contracts" && txCount >= 2) completed = true
+      if (missionId === "three_day_tx" && txCount >= 3) completed = true
     }
 
     // =====================
-    // SOCIAL / FARCASTER
+    // SOCIAL MISSIONS (TEMPORARY OPEN)
     // =====================
 
-   if (
-  missionId === "reply_one" ||
-  missionId === "reply_three" ||
-  missionId === "share_castquest" ||
-  missionId === "first_mission" ||
-  missionId === "three_day_login"
-) {
-  completed = true
-}
+    if (
+      missionId === "reply_one" ||
+      missionId === "reply_three" ||
+      missionId === "share_castquest" ||
+      missionId === "first_mission" ||
+      missionId === "three_day_login"
+    ) {
+      completed = true
+    }
 
     // =====================
     // MILESTONE
