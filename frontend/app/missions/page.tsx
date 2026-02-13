@@ -16,13 +16,13 @@ const ABI = [
   },
 ] as const
 
-export default function Missions() {
+export default function MissionsPage() {
   const { address, isConnected } = useAccount()
 
   const [missions, setMissions] = useState<any[]>([])
   const [completed, setCompleted] = useState<string[]>([])
   const [xp, setXp] = useState(0)
-  const [lang, setLang] = useState<Lang>("en")
+  const [lang] = useState<Lang>("en")
   const [minting, setMinting] = useState(false)
   const [verifying, setVerifying] = useState<string | null>(null)
 
@@ -44,7 +44,7 @@ export default function Missions() {
       .then(setMissions)
   }, [])
 
-  // Load user data
+  // Load user XP
   useEffect(() => {
     if (!address) return
 
@@ -56,7 +56,7 @@ export default function Missions() {
       })
   }, [address])
 
-  // 🔥 GERÇEK VERIFY
+  // 🔥 REAL VERIFY (backend checks chain)
   const verifyMission = async (missionId: string) => {
     if (!address) return alert("Wallet not connected")
 
@@ -109,7 +109,7 @@ export default function Missions() {
         throw new Error(data.error || "Mint failed")
       }
 
-      alert("Mint successful! 🎉\nTX: " + data.hash)
+      alert("Mint successful 🎉\nTX: " + data.hash)
       await refetch()
 
     } catch (err: any) {
@@ -151,7 +151,14 @@ export default function Missions() {
         const isLoading = verifying === m.id
 
         return (
-          <div key={m.id} style={{ border: "1px solid #333", padding: 12, marginBottom: 12 }}>
+          <div
+            key={m.id}
+            style={{
+              border: "1px solid #333",
+              padding: 12,
+              marginBottom: 12,
+            }}
+          >
             <h3>{lang === "tr" ? m.title_tr : m.title_en}</h3>
             <p>{lang === "tr" ? m.description_tr : m.description_en}</p>
 
