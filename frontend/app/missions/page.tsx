@@ -30,59 +30,53 @@ export default function Missions() {
     abi: ABI,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    query: {
-      enabled: !!address,
-    },
+    query: { enabled: !!address },
   })
 
   const hasNFT = balance ? Number(balance) > 0 : false
 
+  const t = translations[lang]
+
+  // Load missions
   useEffect(() => {
     fetch("/api/missions")
       .then(res => res.json())
       .then(setMissions)
-
-    const savedLang = localStorage.getItem("lang") as Lang
-    if (savedLang) setLang(savedLang)
-
-    const saved = localStorage.getItem("completedMissions")
-    if (saved) setCompleted(JSON.parse(saved))
-
-    const savedXp = localStorage.getItem("xp")
-    if (savedXp) setXp(Number(savedXp))
   }, [])
 
-  const t = translations[lang]
+  // Load user data from backend
+  useEffect(() => {
+    if (!address) return
+
+    fetch(`/api/user?wallet=${address}`)
+      .then(res => res.json())
+      .then(data => {
+        setXp(data.xp)
+        setCompleted(data.missions)
+      })
+  }, [address])
 
   const completeMission = async (missionId: string) => {
-    const wallet = address || "demo-user"
+    if (!address) return
 
-    const res = await fetch("/api/complete", {
+    const res = await fetch("/api/user", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ missionId, wallet }),
+      body: JSON.stringify({
+        wallet: address,
+        missionId,
+        xpEarned: 20,
+      }),
     })
 
     const data = await res.json()
 
-    if (data.success) {
-      const updated = [...completed, missionId]
-      setCompleted(updated)
-      localStorage.setItem("completedMissions", JSON.stringify(updated))
-
-      const newXp = xp + data.xpEarned
-      setXp(newXp)
-      localStorage.setItem("xp", String(newXp))
-
-      alert("+" + data.xpEarned + " XP 🎉")
-    }
+    setXp(data.xp)
+    setCompleted(data.missions)
   }
 
   const handleMint = async () => {
-    if (!address) {
-      alert("Wallet not connected")
-      return
-    }
+    if (!address) return alert("Wallet not connected")
 
     try {
       setMinting(true)
@@ -98,22 +92,15 @@ export default function Missions() {
 
       const data = await res.json()
 
-      // 🔥 HTTP hata kontrolü
       if (!res.ok) {
         throw new Error(data.error || "Mint failed")
-      }
-
-      // 🔥 Backend artık hash dönüyor
-      if (!data.hash) {
-        throw new Error("Transaction hash not returned")
       }
 
       alert("Mint successful! 🎉\nTX: " + data.hash)
 
       await refetch()
     } catch (err: any) {
-      console.error(err)
-      alert("Mint failed ❌\n" + (err.message || "Unknown error"))
+      alert("Mint failed ❌\n" + err.message)
     } finally {
       setMinting(false)
     }
@@ -150,14 +137,7 @@ export default function Missions() {
         const isDone = completed.includes(m.id)
 
         return (
-          <div
-            key={m.id}
-            style={{
-              border: "1px solid #333",
-              padding: 12,
-              marginBottom: 12,
-            }}
-          >
+          <div key={m.id} style={{ border: "1px solid #333", padding: 12, marginBottom: 12 }}>
             <h3>{lang === "tr" ? m.title_tr : m.title_en}</h3>
             <p>{lang === "tr" ? m.description_tr : m.description_en}</p>
 
