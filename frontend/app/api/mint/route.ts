@@ -54,11 +54,13 @@ export async function POST(req: Request) {
     const tokenURI = `https://castquest.vercel.app/api/badges/${badgeId}`
 
     const hash = await walletClient.writeContract({
-      address: CONTRACT_ADDRESS,
-      abi: CastQuestABI,
-      functionName: "mintBadge",
-      args: [wallet as `0x${string}`, tokenURI],
-    })
+  chain: base,   // 🔥 BUNU EKLE
+  address: CONTRACT_ADDRESS,
+  abi: CastQuestABI,
+  functionName: "mintBadge",
+  args: [wallet as `0x${string}`, tokenURI],
+})
+
 
     // 🔥 BURASI ÖNEMLİ
     return NextResponse.json({
