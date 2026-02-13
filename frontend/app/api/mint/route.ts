@@ -36,14 +36,13 @@ export async function POST(req: Request) {
       )
     }
 
-   const balance = await (publicClient.readContract as any)({
-  address: CONTRACT_ADDRESS,
-  abi: CastQuestABI,
-  functionName: "balanceOf",
-  args: [wallet as `0x${string}`],
-}) as bigint
-
-
+    // Already minted check
+    const balance = await (publicClient.readContract as any)({
+      address: CONTRACT_ADDRESS,
+      abi: CastQuestABI,
+      functionName: "balanceOf",
+      args: [wallet as `0x${string}`],
+    }) as bigint
 
     if (Number(balance) > 0) {
       return NextResponse.json(
@@ -55,15 +54,17 @@ export async function POST(req: Request) {
     const tokenURI = `https://castquest.vercel.app/api/badges/${badgeId}`
 
     const hash = await walletClient.writeContract({
-      chain: base,
-      account,
       address: CONTRACT_ADDRESS,
       abi: CastQuestABI,
       functionName: "mintBadge",
       args: [wallet as `0x${string}`, tokenURI],
     })
 
-    return NextResponse.json({ success: true, tx: hash })
+    // 🔥 BURASI ÖNEMLİ
+    return NextResponse.json({
+      success: true,
+      hash: hash,   // frontend hash bekliyor
+    })
 
   } catch (err: any) {
     console.error("MINT ERROR:", err)
@@ -71,7 +72,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error: "Mint failed",
-        details: err?.shortMessage || err?.message || "Unknown error"
+        details: err?.shortMessage || err?.message || "Unknown error",
       },
       { status: 500 }
     )
