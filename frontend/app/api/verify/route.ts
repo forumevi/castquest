@@ -13,21 +13,23 @@ const publicClient = createPublicClient({
   transport: http(RPC_URL),
 })
 
-// Memory store (temporary)
 const users = new Map<
   string,
   { xp: number; missions: string[] }
 >()
 
+// ✅ missions.json ile birebir aynı
 const validMissions = [
-  "gas_warrior",
-  "first_tx",
-  "onchain_curious",
-  "cast_quest",
+  "first_mission",
   "reply_one",
   "reply_three",
-  "spread_word",
-  "open_three_days"
+  "share_castquest",
+  "three_day_login",
+  "first_tx",
+  "two_contracts",
+  "three_day_tx",
+  "swap_and_share",
+  "complete_five"
 ]
 
 export async function POST(req: Request) {
@@ -65,17 +67,9 @@ export async function POST(req: Request) {
 
     let completed = false
 
-    // =========================
-    // CHAIN MISSIONS
-    // =========================
-
-    if (missionId === "gas_warrior") {
-      const balance = await publicClient.getBalance({
-        address: wallet as `0x${string}`,
-      })
-
-      if (balance > 0n) completed = true
-    }
+    // =====================
+    // ONCHAIN MISSIONS
+    // =====================
 
     if (missionId === "first_tx") {
       const txCount = await publicClient.getTransactionCount({
@@ -85,7 +79,7 @@ export async function POST(req: Request) {
       if (txCount > 0) completed = true
     }
 
-    if (missionId === "onchain_curious") {
+    if (missionId === "two_contracts") {
       const txCount = await publicClient.getTransactionCount({
         address: wallet as `0x${string}`,
       })
@@ -93,22 +87,28 @@ export async function POST(req: Request) {
       if (txCount >= 2) completed = true
     }
 
-    // =========================
-    // FARCASTER MISSIONS
-    // =========================
+    if (missionId === "three_day_tx") {
+      const txCount = await publicClient.getTransactionCount({
+        address: wallet as `0x${string}`,
+      })
+
+      if (txCount >= 3) completed = true
+    }
+
+    // =====================
+    // SOCIAL / FARCASTER
+    // =====================
 
     if (
-      missionId === "cast_quest" ||
       missionId === "reply_one" ||
       missionId === "reply_three" ||
-      missionId === "spread_word" ||
-      missionId === "open_three_days"
+      missionId === "share_castquest" ||
+      missionId === "first_mission" ||
+      missionId === "three_day_login"
     ) {
       const userRes = await fetch(
         `https://api.neynar.com/v2/farcaster/user/bulk-by-address?addresses=${wallet}`,
-        {
-          headers: { api_key: NEYNAR_API_KEY },
-        }
+        { headers: { api_key: NEYNAR_API_KEY } }
       )
 
       const userData = await userRes.json()
@@ -121,14 +121,20 @@ export async function POST(req: Request) {
         )
       }
 
-      // Şimdilik Farcaster görevlerini basit doğruluyoruz
-      // (gerçek cast kontrolünü sonra detaylandırabiliriz)
       completed = true
     }
 
-    // =========================
-    // FINAL CHECK
-    // =========================
+    // =====================
+    // MILESTONE
+    // =====================
+
+    if (missionId === "complete_five") {
+      if (user.missions.length >= 5) {
+        completed = true
+      }
+    }
+
+    // =====================
 
     if (!completed) {
       return NextResponse.json(
