@@ -99,30 +99,15 @@ export async function POST(req: Request) {
     // SOCIAL / FARCASTER
     // =====================
 
-    if (
-      missionId === "reply_one" ||
-      missionId === "reply_three" ||
-      missionId === "share_castquest" ||
-      missionId === "first_mission" ||
-      missionId === "three_day_login"
-    ) {
-      const userRes = await fetch(
-        `https://api.neynar.com/v2/farcaster/user/bulk-by-address?addresses=${wallet}`,
-        { headers: { api_key: NEYNAR_API_KEY } }
-      )
-
-      const userData = await userRes.json()
-      const fcUsers = userData.users
-
-      if (!fcUsers || fcUsers.length === 0) {
-        return NextResponse.json(
-          { error: "No Farcaster account linked" },
-          { status: 400 }
-        )
-      }
-
-      completed = true
-    }
+   if (
+  missionId === "reply_one" ||
+  missionId === "reply_three" ||
+  missionId === "share_castquest" ||
+  missionId === "first_mission" ||
+  missionId === "three_day_login"
+) {
+  completed = true
+}
 
     // =====================
     // MILESTONE
