@@ -53,19 +53,19 @@ export async function POST(req: Request) {
 
     const tokenURI = `https://castquest.vercel.app/api/badges/${badgeId}`
 
-    const hash = await walletClient.writeContract({
-  chain: base,   // 🔥 BUNU EKLE
-  address: CONTRACT_ADDRESS,
-  abi: CastQuestABI,
-  functionName: "mintBadge",
-  args: [wallet as `0x${string}`, tokenURI],
-})
+    // 🔥 viem type system bypass (stable fix)
+    const hash = await (walletClient.writeContract as any)({
+      chain: base,
+      account: account,
+      address: CONTRACT_ADDRESS,
+      abi: CastQuestABI,
+      functionName: "mintBadge",
+      args: [wallet as `0x${string}`, tokenURI],
+    })
 
-
-    // 🔥 BURASI ÖNEMLİ
     return NextResponse.json({
       success: true,
-      hash: hash,   // frontend hash bekliyor
+      hash: hash,
     })
 
   } catch (err: any) {
