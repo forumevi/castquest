@@ -93,19 +93,24 @@ export default function Missions() {
         body: JSON.stringify({
           wallet: address,
           badgeId: "1",
-
         }),
       })
 
       const data = await res.json()
 
-      if (!data || !data.tx) {
+      // 🔥 HTTP hata kontrolü
+      if (!res.ok) {
+        throw new Error(data.error || "Mint failed")
+      }
+
+      // 🔥 Backend artık hash dönüyor
+      if (!data.hash) {
         throw new Error("Transaction hash not returned")
       }
 
-      alert("Mint successful! 🎉\nTX: " + data.tx)
+      alert("Mint successful! 🎉\nTX: " + data.hash)
 
-      await refetch() // NFT durumunu güncelle
+      await refetch()
     } catch (err: any) {
       console.error(err)
       alert("Mint failed ❌\n" + (err.message || "Unknown error"))
