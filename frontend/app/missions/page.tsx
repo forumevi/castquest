@@ -13,7 +13,7 @@ import {
 import { base } from "wagmi/chains"
 import { translations, Lang } from "../../lib/i18n"
 
-const CONTRACT_ADDRESS = "0xC36f64d1f0A5E64b873A1C547a0fE88784caa8d4"
+const CONTRACT_ADDRESS = "0x6DFb96a740270A066b7e370B0B99730E2920BE83"
 
 const ABI = [
   {
@@ -62,6 +62,7 @@ export default function MissionsPage() {
     abi: ABI,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
+    chainId: base.id, // ⭐ sadece Base'ten okur
     query: { enabled: !!address },
   })
 
@@ -144,7 +145,7 @@ export default function MissionsPage() {
 
     try {
 
-      // Base networke zorla geçir
+      // ⭐ Base'e zorla geç
       if (chainId !== base.id) {
 
         await switchChainAsync({
@@ -153,18 +154,17 @@ export default function MissionsPage() {
 
       }
 
-      // tekrar kontrol
       if (hasNFT) {
         alert("You already minted this badge")
         return
       }
 
-      // BASE NETWORK MINT
+      // ⭐⭐⭐ EN KRITIK FIX
       await writeContractAsync({
 
         account: address,
 
-        chain: base,
+        chain: base, // ⭐⭐⭐ ETH yerine BASE kullanmaya zorlar
 
         address: CONTRACT_ADDRESS,
 
@@ -224,7 +224,7 @@ export default function MissionsPage() {
               onClick={handleMint}
               disabled={isPending}
             >
-              {isPending ? "Minting on Base..." : "Mint Badge NFT"}
+              {isPending ? "Minting on Base..." : "Mint Badge NFT (Base)"}
             </button>
 
           )}
