@@ -162,22 +162,57 @@ export default function MissionsPage() {
         return
       }
 
-      await writeContractAsync({
+      const handleMint = async () => {
 
-        chain: base,
+  if (!isConnected || !address) {
+    alert("Wallet not connected")
+    return
+  }
 
-        address: CONTRACT_ADDRESS,
+  try {
 
-        abi: ABI,
+    if (chainId !== base.id) {
 
-        functionName: "mintBadge",
-
-        args: [
-          address,
-          "https://castquest.vercel.app/api/badges/1"
-        ],
-
+      await switchChain({
+        chainId: base.id
       })
+
+      return
+    }
+
+    if (hasNFT) {
+
+      alert("You already minted this badge")
+      return
+    }
+
+    await writeContractAsync({
+
+      account: address,   // ⭐ CRITICAL FIX
+
+      chain: base,
+
+      address: CONTRACT_ADDRESS,
+
+      abi: ABI,
+
+      functionName: "mintBadge",
+
+      args: [
+        address,
+        "https://castquest.vercel.app/api/badges/1"
+      ],
+
+    })
+
+  } catch (err: any) {
+
+    alert(err.shortMessage || err.message)
+
+  }
+
+}
+
 
     } catch (err: any) {
 
