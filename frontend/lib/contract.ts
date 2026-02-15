@@ -1,27 +1,39 @@
-import { getWalletClient } from "@wagmi/core"
-import { config } from "./wallet"
+import { createWalletClient, http } from "viem"
+import { base } from "viem/chains"
 import CastQuestABI from "../abi/CastQuestBadges.json"
 
 export const CONTRACT_ADDRESS =
-  process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`
+  "0xb1A1F63b77B45F279F465c8B3c65b131704F3939" as `0x${string}`
 
-export async function mintBadge(badgeId: number) {
-  const walletClient = await getWalletClient(config)
+export async function mintBadge(
+  walletClient: any,
+  badgeId: number,
+  userAddress: `0x${string}`
+) {
 
   if (!walletClient) {
-    throw new Error("Wallet not connected")
+    throw new Error("Wallet client not found")
   }
 
-  const [account] = await walletClient.getAddresses()
-
-  const tokenURI = `https://castquest.vercel.app/api/badges/${badgeId}`
+  const tokenURI =
+    `https://castquest.vercel.app/api/badges/${badgeId}`
 
   const hash = await walletClient.writeContract({
+
+    account: walletClient.account,   // ✅ REQUIRED
+    chain: base,                     // ✅ REQUIRED FIX
+
     address: CONTRACT_ADDRESS,
+
     abi: CastQuestABI,
+
     functionName: "mintBadge",
-    args: [account, tokenURI],
-    account,
+
+    args: [
+      userAddress,
+      tokenURI
+    ],
+
   })
 
   return hash
