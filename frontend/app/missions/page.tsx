@@ -11,7 +11,8 @@ import {
 } from "wagmi"
 import { translations, Lang } from "../../lib/i18n"
 
-const CONTRACT_ADDRESS = "0xb1A1F63b77B45F279F465c8B3c65b131704F3939"
+const CONTRACT_ADDRESS = "0x6DFb96a740270A066b7e370B0B99730E2920BE83"
+
 
 const ABI = [
   {
