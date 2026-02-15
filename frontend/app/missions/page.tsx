@@ -6,7 +6,8 @@ import {
   useReadContract,
   useWriteContract,
   useWaitForTransactionReceipt,
-  useChainId
+  useChainId,
+  useWalletClient
 } from "wagmi"
 import { translations, Lang } from "../../lib/i18n"
 
@@ -36,6 +37,7 @@ export default function MissionsPage() {
 
   const { address, isConnected } = useAccount()
   const chainId = useChainId()
+  const { data: walletClient } = useWalletClient()
 
   const [missions, setMissions] = useState<any[]>([])
   const [completed, setCompleted] = useState<string[]>([])
@@ -135,7 +137,7 @@ export default function MissionsPage() {
 
   const handleMint = async () => {
 
-    if (!address) {
+    if (!address || !walletClient) {
       alert("Wallet not connected")
       return
     }
@@ -143,7 +145,8 @@ export default function MissionsPage() {
     try {
 
       await writeContractAsync({
-        chainId: chainId, // ✅ FIX
+        account: walletClient.account, // ✅ FIX
+        chain: walletClient.chain,     // ✅ FIX
         address: CONTRACT_ADDRESS,
         abi: ABI,
         functionName: "mintBadge",
