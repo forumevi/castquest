@@ -62,7 +62,6 @@ export default function MissionsPage() {
     abi: ABI,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    chainId: base.id, // ⭐ Base zorla
     query: { enabled: !!address },
   })
 
@@ -145,7 +144,7 @@ export default function MissionsPage() {
 
     try {
 
-      // ⭐ Base'e zorla geç
+      // Base networke zorla geçir
       if (chainId !== base.id) {
 
         await switchChainAsync({
@@ -160,12 +159,12 @@ export default function MissionsPage() {
         return
       }
 
-      // ⭐ Mint — Base network ZORLA
+      // BASE NETWORK MINT
       await writeContractAsync({
 
         account: address,
 
-        chain: base, // ⭐ EN KRITIK FIX
+        chain: base,
 
         address: CONTRACT_ADDRESS,
 
