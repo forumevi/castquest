@@ -1,11 +1,13 @@
 import { createConfig, http } from "wagmi"
-import { mainnet } from "wagmi/chains"
+import { base } from "wagmi/chains"
 import { injected } from "wagmi/connectors"
 
 export const config = createConfig({
-  chains: [mainnet],
+  chains: [base],
   transports: {
-    [mainnet.id]: http(),
+    [base.id]: http("https://mainnet.base.org"),
   },
-  connectors: [injected()],
+  connectors: [
+    injected(),
+  ],
 })
