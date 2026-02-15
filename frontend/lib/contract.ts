@@ -3,7 +3,7 @@ import { base } from "viem/chains"
 import CastQuestABI from "../abi/CastQuestBadges.json"
 
 export const CONTRACT_ADDRESS =
-  "0xb1A1F63b77B45F279F465c8B3c65b131704F3939" as `0x${string}`
+  "0x6DFb96a740270A066b7e370B0B99730E2920BE83" as `0x${string}`
 
 export async function mintBadge(
   walletClient: any,
