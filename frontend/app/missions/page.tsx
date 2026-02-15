@@ -7,7 +7,6 @@ import {
   useWriteContract,
   useWaitForTransactionReceipt,
   useChainId,
-  useWalletClient,
   useSwitchChain
 } from "wagmi"
 
@@ -40,8 +39,6 @@ export default function MissionsPage() {
 
   const { address, isConnected } = useAccount()
   const chainId = useChainId()
-
-  const { data: walletClient } = useWalletClient()
   const { switchChain } = useSwitchChain()
 
   const [missions, setMissions] = useState<any[]>([])
@@ -142,14 +139,14 @@ export default function MissionsPage() {
 
   const handleMint = async () => {
 
-    if (!address || !walletClient) {
+    if (!isConnected || !address) {
+
       alert("Wallet not connected")
       return
     }
 
     try {
 
-      // Base network'e geç zorunlu
       if (chainId !== base.id) {
 
         await switchChain({
@@ -159,19 +156,20 @@ export default function MissionsPage() {
         return
       }
 
-      // Zaten mint ettiyse durdur
       if (hasNFT) {
+
         alert("You already minted this badge")
         return
       }
 
       await writeContractAsync({
 
-        account: walletClient.account,
         chain: base,
 
         address: CONTRACT_ADDRESS,
+
         abi: ABI,
+
         functionName: "mintBadge",
 
         args: [
