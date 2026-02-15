@@ -53,9 +53,7 @@ export default function MissionsPage() {
     isPending
   } = useWriteContract()
 
-  const {
-    isSuccess
-  } = useWaitForTransactionReceipt({
+  const { isSuccess } = useWaitForTransactionReceipt({
     hash,
   })
 
@@ -140,13 +138,13 @@ export default function MissionsPage() {
   const handleMint = async () => {
 
     if (!isConnected || !address) {
-
       alert("Wallet not connected")
       return
     }
 
     try {
 
+      // Base networke geç
       if (chainId !== base.id) {
 
         await switchChain({
@@ -156,63 +154,31 @@ export default function MissionsPage() {
         return
       }
 
+      // zaten mint ettiyse engelle
       if (hasNFT) {
-
         alert("You already minted this badge")
         return
       }
 
-      const handleMint = async () => {
+      // mint
+      await writeContractAsync({
 
-  if (!isConnected || !address) {
-    alert("Wallet not connected")
-    return
-  }
+        account: address,
 
-  try {
+        chain: base,
 
-    if (chainId !== base.id) {
+        address: CONTRACT_ADDRESS,
 
-      await switchChain({
-        chainId: base.id
+        abi: ABI,
+
+        functionName: "mintBadge",
+
+        args: [
+          address,
+          "https://castquest.vercel.app/api/badges/1"
+        ],
+
       })
-
-      return
-    }
-
-    if (hasNFT) {
-
-      alert("You already minted this badge")
-      return
-    }
-
-    await writeContractAsync({
-
-      account: address,   // ⭐ CRITICAL FIX
-
-      chain: base,
-
-      address: CONTRACT_ADDRESS,
-
-      abi: ABI,
-
-      functionName: "mintBadge",
-
-      args: [
-        address,
-        "https://castquest.vercel.app/api/badges/1"
-      ],
-
-    })
-
-  } catch (err: any) {
-
-    alert(err.shortMessage || err.message)
-
-  }
-
-}
-
 
     } catch (err: any) {
 
