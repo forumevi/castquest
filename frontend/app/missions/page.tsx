@@ -39,7 +39,7 @@ export default function MissionsPage() {
 
   const { address, isConnected } = useAccount()
   const chainId = useChainId()
-  const { switchChain } = useSwitchChain()
+  const { switchChainAsync } = useSwitchChain()
 
   const [missions, setMissions] = useState<any[]>([])
   const [completed, setCompleted] = useState<string[]>([])
@@ -144,28 +144,26 @@ export default function MissionsPage() {
 
     try {
 
-      // Base networke geç
+      // Base'e zorla geç ve sonucu bekle
       if (chainId !== base.id) {
 
-        await switchChain({
-          chainId: base.id
+        await switchChainAsync({
+          chainId: base.id,
         })
 
-        return
       }
 
-      // zaten mint ettiyse engelle
       if (hasNFT) {
         alert("You already minted this badge")
         return
       }
 
-      // mint
+      // ⭐ BURASI KRITIK FIX
       await writeContractAsync({
 
         account: address,
 
-        chain: base,
+        chainId: base.id,
 
         address: CONTRACT_ADDRESS,
 
