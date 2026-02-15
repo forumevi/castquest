@@ -62,6 +62,7 @@ export default function MissionsPage() {
     abi: ABI,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
+    chainId: base.id, // ⭐ Base zorla
     query: { enabled: !!address },
   })
 
@@ -87,7 +88,7 @@ export default function MissionsPage() {
 
   useEffect(() => {
     if (isSuccess) {
-      alert("Mint successful 🎉")
+      alert("Mint successful on Base 🎉")
       refetch()
     }
   }, [isSuccess, refetch])
@@ -144,7 +145,7 @@ export default function MissionsPage() {
 
     try {
 
-      // Base'e zorla geç ve sonucu bekle
+      // ⭐ Base'e zorla geç
       if (chainId !== base.id) {
 
         await switchChainAsync({
@@ -153,17 +154,18 @@ export default function MissionsPage() {
 
       }
 
+      // tekrar kontrol
       if (hasNFT) {
         alert("You already minted this badge")
         return
       }
 
-      // ⭐ BURASI KRITIK FIX
+      // ⭐ Mint — Base network ZORLA
       await writeContractAsync({
 
         account: address,
 
-        chainId: base.id,
+        chain: base, // ⭐ EN KRITIK FIX
 
         address: CONTRACT_ADDRESS,
 
@@ -223,7 +225,7 @@ export default function MissionsPage() {
               onClick={handleMint}
               disabled={isPending}
             >
-              {isPending ? "Minting..." : "Mint Badge NFT"}
+              {isPending ? "Minting on Base..." : "Mint Badge NFT"}
             </button>
 
           )}
