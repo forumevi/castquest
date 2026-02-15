@@ -162,22 +162,22 @@ export default function MissionsPage() {
       // ⭐⭐⭐ EN KRITIK FIX
       await writeContractAsync({
 
-        account: address,
+  account: address,
 
-        chain: base, // ⭐⭐⭐ ETH yerine BASE kullanmaya zorlar
+  chain: base, // KRITIK
 
-        address: CONTRACT_ADDRESS,
+  address: CONTRACT_ADDRESS,
 
-        abi: ABI,
+  abi: ABI,
 
-        functionName: "mintBadge",
+  functionName: "mintBadge",
 
-        args: [
-          address,
-          "https://castquest.vercel.app/api/badges/1"
-        ],
+  args: [
+    address,
+    "https://castquest.vercel.app/api/badges/1"
+  ],
 
-      })
+})
 
     } catch (err: any) {
 
