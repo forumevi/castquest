@@ -13,7 +13,7 @@ import {
 import { base } from "wagmi/chains"
 import { translations, Lang } from "../../lib/i18n"
 
-const CONTRACT_ADDRESS = "0x6DFb96a740270A066b7e370B0B99730E2920BE83"
+const CONTRACT_ADDRESS = "0xC36f64d1f0A5E64b873A1C547a0fE88784caa8d4"
 
 const ABI = [
   {
