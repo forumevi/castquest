@@ -5,7 +5,8 @@ import {
   useAccount,
   useReadContract,
   useWriteContract,
-  useWaitForTransactionReceipt
+  useWaitForTransactionReceipt,
+  useChainId
 } from "wagmi"
 import { translations, Lang } from "../../lib/i18n"
 
@@ -34,6 +35,7 @@ const ABI = [
 export default function MissionsPage() {
 
   const { address, isConnected } = useAccount()
+  const chainId = useChainId()
 
   const [missions, setMissions] = useState<any[]>([])
   const [completed, setCompleted] = useState<string[]>([])
@@ -42,7 +44,7 @@ export default function MissionsPage() {
   const [verifying, setVerifying] = useState<string | null>(null)
 
   const {
-    writeContract,
+    writeContractAsync,
     data: hash,
     isPending
   } = useWriteContract()
@@ -86,7 +88,7 @@ export default function MissionsPage() {
       alert("Mint successful 🎉")
       refetch()
     }
-  }, [isSuccess])
+  }, [isSuccess, refetch])
 
   const verifyMission = async (missionId: string) => {
 
@@ -140,7 +142,8 @@ export default function MissionsPage() {
 
     try {
 
-      writeContract({
+      await writeContractAsync({
+        chainId: chainId, // ✅ FIX
         address: CONTRACT_ADDRESS,
         abi: ABI,
         functionName: "mintBadge",
