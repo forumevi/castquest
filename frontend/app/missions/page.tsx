@@ -7,12 +7,12 @@ import {
   useWriteContract,
   useWaitForTransactionReceipt,
   useChainId,
-  useWalletClient
+  useSwitchChain
 } from "wagmi"
+import { base } from "wagmi/chains"
 import { translations, Lang } from "../../lib/i18n"
 
 const CONTRACT_ADDRESS = "0x6DFb96a740270A066b7e370B0B99730E2920BE83"
-
 
 const ABI = [
   {
@@ -37,14 +37,10 @@ const ABI = [
 export default function MissionsPage() {
 
   const { address, isConnected } = useAccount()
-  const chainId = useChainId()
-  const { data: walletClient } = useWalletClient()
 
-  const [missions, setMissions] = useState<any[]>([])
-  const [completed, setCompleted] = useState<string[]>([])
-  const [xp, setXp] = useState(0)
-  const [lang] = useState<Lang>("en")
-  const [verifying, setVerifying] = useState<string | null>(null)
+  const chainId = useChainId()
+
+  const { switchChain } = useSwitchChain()
 
   const {
     writeContractAsync,
@@ -58,6 +54,12 @@ export default function MissionsPage() {
     hash,
   })
 
+  const [missions, setMissions] = useState<any[]>([])
+  const [completed, setCompleted] = useState<string[]>([])
+  const [xp, setXp] = useState(0)
+  const [lang] = useState<Lang>("en")
+  const [verifying, setVerifying] = useState<string | null>(null)
+
   const { data: balance, refetch } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: ABI,
@@ -67,6 +69,7 @@ export default function MissionsPage() {
   })
 
   const hasNFT = balance ? Number(balance) > 0 : false
+
   const t = translations[lang]
 
   useEffect(() => {
@@ -138,16 +141,31 @@ export default function MissionsPage() {
 
   const handleMint = async () => {
 
-    if (!address || !walletClient) {
+    if (!address) {
       alert("Wallet not connected")
       return
     }
 
     try {
 
+      // FORCE BASE NETWORK
+      if (chainId !== base.id) {
+
+        await switchChain({
+          chainId: base.id
+        })
+
+        return
+      }
+
+      // DOUBLE MINT PROTECTION (frontend)
+      if (hasNFT) {
+        alert("You already minted this badge")
+        return
+      }
+
       await writeContractAsync({
-        account: walletClient.account, // ✅ FIX
-        chain: walletClient.chain,     // ✅ FIX
+        chainId: base.id,
         address: CONTRACT_ADDRESS,
         abi: ABI,
         functionName: "mintBadge",
@@ -159,7 +177,7 @@ export default function MissionsPage() {
 
     } catch (err: any) {
 
-      alert(err.message)
+      alert(err.shortMessage || err.message)
 
     }
 
@@ -218,7 +236,8 @@ export default function MissionsPage() {
 
         return (
 
-          <div key={m.id}
+          <div
+            key={m.id}
             style={{
               border: "1px solid #333",
               padding: 12,
